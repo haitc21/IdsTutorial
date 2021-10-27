@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -9,12 +10,15 @@ namespace IdentityExample.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly IEmailSender _emailSender;
 
         public HomeController(UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            SignInManager<IdentityUser> signInManager,
+            IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
@@ -59,13 +63,41 @@ namespace IdentityExample.Controllers
             var user = new IdentityUser()
             {
                 UserName = username,
-                Email = "haidz@gmail.com"
+                Email = "tranhai21121995@gmail.com"
             };
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                return RedirectToAction("Index");
+                var code = _userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                string link = Url.Action(
+                    nameof(VerifyEmail),
+                    "home", new { userId = user.Id, code = code },
+                    Request.Scheme);
+                await _emailSender.SendEmailAsync(user.Email, "Xác nhận địa chỉ email",
+                    $"Hãy xác nhận địa chỉ email bằng cách <a href='{link}'>Bấm vào đây</a>.");
+                return RedirectToAction("EmailVerification");
             }
+            return View();
+        }
+
+        public async Task<IActionResult> VerifyEmail(string userId, string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+                var result = await _userManager.ConfirmEmailAsync(user, code);
+                if (result.Succeeded)
+                {
+                    return View();
+                }
+            }
+            return BadRequest();
+        }
+
+        public async Task<IActionResult> EmailVerification()
+        {
             return View();
         }
 

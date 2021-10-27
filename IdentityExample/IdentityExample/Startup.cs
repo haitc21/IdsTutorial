@@ -1,15 +1,26 @@
 ﻿using IdentityExample.Data;
+using IdentityExample.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NETCore.MailKit.Extensions;
+using NETCore.MailKit.Infrastructure.Internal;
 
 namespace IdentityExample
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>(config =>
@@ -23,6 +34,8 @@ namespace IdentityExample
                 config.Password.RequireNonAlphanumeric = false;
                 config.Password.RequiredLength = 3;
                 config.Password.RequireLowercase = false;
+
+                config.SignIn.RequireConfirmedEmail = true;
             })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
@@ -33,6 +46,11 @@ namespace IdentityExample
                 config.Cookie.Name = "HaiDz.Identity.Cookie";
                 config.LoginPath = "/home/login";
             });
+
+            //var mailConfi = _configuration.GetSection("MailSettings").Get<MailKitOptions>();
+            //services.AddMailKit(config => {
+            //    config.UseMailKit(mailConfi);
+            //});
 
             //services.AddAuthentication("HaiDz")
             //    .AddCookie("HaiDz", config =>
@@ -54,6 +72,12 @@ namespace IdentityExample
             //    });
 
             services.AddControllersWithViews();
+            services.AddTransient<IEmailSender,EmailSenderService>();
+
+            // Options
+            services.AddOptions();                                        // Kích hoạt Options
+            var mailsettings = _configuration.GetSection("MailSettings");  // đọc config
+            services.Configure<MailSettings>(mailsettings);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
