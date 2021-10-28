@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace IdentityExample.Controllers
@@ -68,7 +70,7 @@ namespace IdentityExample.Controllers
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                var code = _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 string link = Url.Action(
                     nameof(VerifyEmail),
