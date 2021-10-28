@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -14,6 +15,21 @@ namespace Basics.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+        public async Task<IActionResult> Dowloads()
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Dowloads", "test.xlsx");
+            byte[] fileBytes = null;
+            fileBytes = System.IO.File.ReadAllBytes(path);
+            if (fileBytes == null)
+                return NotFound();
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            //using (var stream = System.IO.File.OpenRead(path))
+            //{
+            //    if (stream == null)
+            //        return NotFound();
+            //    return File(stream, "application/octet-stream");
+            //}
         }
 
         [Authorize]

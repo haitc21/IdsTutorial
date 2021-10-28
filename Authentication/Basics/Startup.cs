@@ -43,6 +43,8 @@ namespace Basics
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
+
             app.UseRouting();
 
             // Who you are? Mày là ai?

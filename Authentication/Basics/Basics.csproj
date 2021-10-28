@@ -9,4 +9,12 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Dowloads\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Dowloads\test.xlsx" />
+  </ItemGroup>
+
 </Project>
