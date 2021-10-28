@@ -22,6 +22,24 @@ namespace Basics.Controllers
             return View();
         }
 
+        [Authorize( Policy = "NgaySinh")]
+        public IActionResult SecretPoliCyDob()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult SecretPolicyRole()
+        {
+            return View();
+        }
+
+        public IActionResult AccessDenie()
+        {
+            return View();
+        }
+
+
 
         public IActionResult Authenticate()
         {
@@ -29,7 +47,11 @@ namespace Basics.Controllers
             {
                  new Claim(ClaimTypes.Name,"Hai dz"),
                  new Claim(ClaimTypes.Email,"Haidz@gmail.com"),
-                 new Claim("HaiDz","Hai dz vo doi")
+                 new Claim("HaiDz","Hai dz vo doi"),
+                 //
+                 
+                 new Claim(ClaimTypes.DateOfBirth,"21/12/1995"),
+                 new Claim(ClaimTypes.Role,"Admin")
             };
 
             var bangLaiClaims = new List<Claim>()

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Basics.AuthorizationRequirements;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Basics
@@ -22,7 +25,7 @@ namespace Basics
                     config.Cookie.Name = "Haidz.Cookie";
 
                     // Cho cookie nó sống trong 1 phút
-                    config.Cookie.MaxAge = new TimeSpan(0,1,0);
+                    //config.Cookie.MaxAge = new TimeSpan(0, 1, 0);
 
 
                     // Nếu không cấu hình thì nó sẽ mặc định vào 
@@ -32,7 +35,40 @@ namespace Basics
 
                     // cấu hình trang login
                     config.LoginPath = "/home/authenticate";
+                    config.AccessDeniedPath = "/home/AccessDenie";
                 });
+
+            services.AddAuthorization(config =>
+            {
+                // 3 cách để khai báo policy
+
+                //var defaultAuthBuilder = new AuthorizationPolicyBuilder();
+                //var defaultPolicy = defaultAuthBuilder
+                //                    .RequireAuthenticatedUser()
+                //                    .RequireClaim(ClaimTypes.DateOfBirth)
+                //                    .Build();
+
+                //config.DefaultPolicy = defaultPolicy;
+
+                //config.AddPolicy("NgaySinh", policyBuilder =>
+                //{
+                //    policyBuilder.AddRequirements(new CustomRequireClaim(ClaimTypes.DateOfBirth));
+                //});
+
+                config.AddPolicy("NgaySinh", policyBuilder =>
+                {
+                    policyBuilder.RequireCustomClaim(ClaimTypes.DateOfBirth);
+                });
+
+                //==========
+                config.AddPolicy("NhomQuyen", policyBuilder =>
+                {
+                    policyBuilder.RequireClaim(ClaimTypes.Role, "Admin");
+                });
+
+            });
+
+            services.AddScoped<IAuthorizationHandler, CustomRequireClaimHandler>();
             services.AddControllersWithViews();
         }
 
