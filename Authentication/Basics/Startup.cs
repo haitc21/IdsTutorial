@@ -1,8 +1,11 @@
 ﻿using Basics.AuthorizationRequirements;
+using Basics.Tranformer;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -68,8 +71,24 @@ namespace Basics
 
             });
 
-            services.AddScoped<IAuthorizationHandler, CustomRequireClaimHandler>();
-            services.AddControllersWithViews();
+            services.AddControllersWithViews(config =>
+            {
+
+                var defaultAuthBuilder = new AuthorizationPolicyBuilder();
+                var defaultPolicy = defaultAuthBuilder
+                                    .RequireAuthenticatedUser()
+                                    .RequireClaim(ClaimTypes.DateOfBirth)
+                                    .Build();
+                // global authorizefilter
+                // Mặc định tất cả controller đều phải tuần theo defaultPolicy
+                // Tự động redirect về trang đăng nhập cấu hình ở AddAuthentication
+                //config.Filters.Add(new AuthorizeFilter(defaultPolicy));
+            });
+
+
+            services.AddScoped<IAuthorizationHandler, CookieJarAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, CookieJarAuthorizationHandler>();
+            services.AddScoped<IClaimsTransformation, ClaimTranformation>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

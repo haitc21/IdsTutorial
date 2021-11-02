@@ -1,1 +1,15 @@
 ﻿<h1>Trang Home</h1>
+@if (User.Identity.IsAuthenticated)
+{
+    <h1>User đã IsAuthenticated</h1>
+}
+else
+{
+    <h1>User chưa IsAuthenticated</h1>
+}
+@using Microsoft.AspNetCore.Authorization;
+@inject IAuthorizationService authoService;
+@if ((await authoService.AuthorizeAsync(User, "NgaySinh")).Succeeded)
+{
+    <h1>User có claim Ngáyinh</h1>
+}

@@ -11,7 +11,21 @@ namespace Basics.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IAuthorizationService _authoService;
+
+        public HomeController(IAuthorizationService authoService)
+        {
+            _authoService = authoService;
+        }
+
+
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult Anonymus()
         {
             return View();
         }
@@ -22,7 +36,7 @@ namespace Basics.Controllers
             return View();
         }
 
-        [Authorize( Policy = "NgaySinh")]
+        [Authorize(Policy = "NgaySinh")]
         public IActionResult SecretPoliCyDob()
         {
             return View();
@@ -40,14 +54,14 @@ namespace Basics.Controllers
         }
 
 
-
+      
         public IActionResult Authenticate()
         {
             var haidzClaims = new List<Claim>()
             {
                  new Claim(ClaimTypes.Name,"Hai dz"),
                  new Claim(ClaimTypes.Email,"Haidz@gmail.com"),
-                 new Claim("HaiDz","Hai dz vo doi"),
+                 new Claim("HaiDz Claim","Hai dz vo doi"),
                  //
                  
                  new Claim(ClaimTypes.DateOfBirth,"21/12/1995"),
@@ -60,12 +74,27 @@ namespace Basics.Controllers
                  new Claim("Bang lai may aby","K"),
             };
 
-            var haidzIdentity = new ClaimsIdentity(haidzClaims, "Hai dz identity");
-            var bangLaiIdentity = new ClaimsIdentity(bangLaiClaims, "Bang lai identity");
+            var haidzIdentity = new ClaimsIdentity(haidzClaims, "Hai dz ClaimsIdentity");
+            var bangLaiIdentity = new ClaimsIdentity(bangLaiClaims, "Bang lai ClaimsIdentity");
 
             var userPrincipals = new ClaimsPrincipal(new[] { haidzIdentity, bangLaiIdentity });
 
             HttpContext.SignInAsync(userPrincipals);
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> DoStuff([FromServices] IAuthorizationService authoService)
+        {
+            var builder = new AuthorizationPolicyBuilder("Shema");
+            var custormPolicy = builder.RequireClaim("Hello").Build();
+
+            // HttpContext được khai báo trong ControllerBase
+            var result = await authoService.AuthorizeAsync(HttpContext.User, "NgaySinh");
+
+            if (result.Succeeded)
+            {
+                return View("Index");
+            }
             return RedirectToAction("Index");
         }
     }

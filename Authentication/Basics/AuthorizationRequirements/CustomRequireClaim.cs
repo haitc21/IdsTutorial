@@ -15,7 +15,7 @@ namespace Basics.AuthorizationRequirements
 
         public string ClaimType { get; }
     }
-    public class CustomRequireClaimHandler : AuthorizationHandler<CustomRequireClaim>
+    public class CookieJarAuthorizationHandler : AuthorizationHandler<CustomRequireClaim>
     {
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
