@@ -40,7 +40,7 @@ namespace oauth.Controllers
             // https://docs.microsoft.com/en-us/dotnet/api/system.identitymodel.tokens.securitykey?view=dotnet-plat-ext-5.0
             var signingCredentials = new SigningCredentials(key, algorithm);
 
-            var tokent = new JwtSecurityToken(
+            var token = new JwtSecurityToken(
                 Constants.Issuer,
                 Constants.Audiance,
                 claims,
@@ -49,7 +49,18 @@ namespace oauth.Controllers
                 signingCredentials
                 );
 
-            return RedirectToAction("Index");
+            var tokenJson = new JwtSecurityTokenHandler().WriteToken(token);
+
+            // https://jwt.io/#encoded-jwt
+            // Copy tokenJson len de xem thong tin
+            return Ok(new { access_token = tokenJson });
+        }
+
+        public IActionResult Decode(string part)
+        {
+            var bytes = Convert.FromBase64String(part);
+            var result = Encoding.UTF8.GetString(bytes);
+            return Ok(result);
         }
     }
 }
